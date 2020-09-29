@@ -7,7 +7,7 @@ At most, it is an example of how one could go about building a clean python inte
 
 ## Cite
 
-I am in no way affiliated with the developers of the ELKI tool. All credit goes to them.
+**I am in no way affiliated with the developers of the ELKI tool. All credit goes to them.**
 
 Cf. [https://elki-project.github.io/](https://elki-project.github.io/) for the official ELKI website. Should you use this tool, please follow the instructions on the ELKI website of how and what to cite!
 
