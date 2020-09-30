@@ -4,12 +4,14 @@ from prefect import Flow
 import pandas as pd
 import io
 
+from .cte import ELKI_FILEPATH
+
 
 class Hics(Elki):
     def __init__(
         self,
         verbose=False,
-        elki="/home/zissou/Software/weka/weka.jar",
+        elki=ELKI_FILEPATH,
         contamination=0.1,
         k=5,
         **kwargs

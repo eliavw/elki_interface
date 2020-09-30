@@ -4,15 +4,11 @@ import prefect
 
 import tempfile
 
+from .cte import ELKI_FILEPATH
+
 
 class Elki:
-    def __init__(
-        self,
-        verbose=False,
-        elki="/home/zissou/Software/weka/weka.jar",
-        contamination=0.1,
-        **kwargs
-    ):
+    def __init__(self, verbose=False, elki=ELKI_FILEPATH, contamination=0.1, **kwargs):
         # General params
         self.verbose = verbose
 
@@ -111,12 +107,12 @@ class Elki:
     # CLI properties
     @property
     def kdd_command(self):
-        kddcli = "de.lmu.ifi.dbs.elki.application.KDDCLIApplication"
+        kddcli = "KDDCLIApplication"
         return "{} {}".format(self.javacall, kddcli)
 
     @property
     def javacall(self):
-        return 'java -cp "{0}/elki/*:{0}/dependency/*"'.format(self.elki)
+        return "java -jar {}".format(self.elki)
 
     @property
     def eval_command(self):
