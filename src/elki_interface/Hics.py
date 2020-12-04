@@ -9,12 +9,7 @@ from .cte import ELKI_FILEPATH
 
 class Hics(Elki):
     def __init__(
-        self,
-        verbose=False,
-        elki=ELKI_FILEPATH,
-        contamination=0.1,
-        k=5,
-        **kwargs
+        self, verbose=False, elki=ELKI_FILEPATH, contamination=0.1, k=5, **kwargs
     ):
         super().__init__(verbose=verbose, elki=elki, contamination=contamination)
 
@@ -30,6 +25,8 @@ class Hics(Elki):
         self.status = self.fit_flow.run()
         self.out = self.status.result[self.fit_shell_task].result
 
+        self.out = self._filter_out(self.out, X.shape[0])
+
         # Process
         df = self._to_dataframe(self.out)
 
@@ -43,6 +40,20 @@ class Hics(Elki):
     # --------------
     # Internal Methods
     # --------------
+    @staticmethod
+    def _filter_out(out, n_instances):
+        if len(out) > n_instances:
+            """
+            ELKI returned some additional things.
+            These are not outputs. Luckily, the last n_instances _will_ be outputs,
+            therefore, we just look at those.
+
+            This is hacky, but a lot easier than writing a custom parser, and for our purposes, it works fine.
+            """
+            return out[-n_instances:]
+        else:
+            return out
+
     @staticmethod
     def _to_dataframe(out):
         return pd.read_csv(
