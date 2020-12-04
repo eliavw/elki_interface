@@ -1,3 +1,6 @@
+# binaries
+*.jar
+
 # Ignore out/tmp directories
 tmp/
 **/tmp/
