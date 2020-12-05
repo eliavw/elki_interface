@@ -21,19 +21,22 @@ class Hics(Elki):
     def fit(self, X):
         super().fit(X)
 
-        # Run
         self.status = self.fit_flow.run()
-        self.out = self.status.result[self.fit_shell_task].result
-
-        self.out = self._filter_out(self.out, X.shape[0])
+        raw = self.status.result[self.fit_shell_task].result
+        res = self._filter_raw(raw, X.shape[0])
 
         # Process
-        df = self._to_dataframe(self.out)
+        df = self._to_dataframe(res)
 
         # Set scores and labels
         # TODO: Make this more consistent.
         self._scores = self._to_scores(df)
         self._set_labels()
+
+        # Sometimes it struggles to properly kill the process.
+        del raw
+        del res
+        self.fit_shell_task = None
 
         return
 
@@ -41,8 +44,8 @@ class Hics(Elki):
     # Internal Methods
     # --------------
     @staticmethod
-    def _filter_out(out, n_instances):
-        if len(out) > n_instances:
+    def _filter_raw(raw, n_instances):
+        if len(raw) > n_instances:
             """
             ELKI returned some additional things.
             These are not outputs. Luckily, the last n_instances _will_ be outputs,
@@ -50,14 +53,14 @@ class Hics(Elki):
 
             This is hacky, but a lot easier than writing a custom parser, and for our purposes, it works fine.
             """
-            return out[-n_instances:]
+            return raw[-n_instances:]
         else:
-            return out
+            return raw
 
     @staticmethod
-    def _to_dataframe(out):
+    def _to_dataframe(res):
         return pd.read_csv(
-            io.StringIO("\n".join(out)), delim_whitespace=True, header=None, index_col=0
+            io.StringIO("\n".join(res)), delim_whitespace=True, header=None, index_col=0
         )
 
     @staticmethod
@@ -69,10 +72,10 @@ class Hics(Elki):
     # --------------
     @property
     def fit_flow(self):
+        shelltask = ShellTask(return_all=True, log_stderr=True)
+
         with Flow("fit") as f:
-            self.fit_shell_task = ShellTask(return_all=True, log_stderr=True)(
-                command=self.fit_command
-            )
+            self.fit_shell_task = shelltask(command=self.fit_command)
 
         return f
 
