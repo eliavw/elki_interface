@@ -1,10 +1,12 @@
-from .Elki import Elki
-from prefect.tasks.shell import ShellTask
-from prefect import Flow
-import pandas as pd
 import io
+import warnings
+
+import pandas as pd
+from prefect import Flow
+from prefect.tasks.shell import ShellTask
 
 from .cte import ELKI_FILEPATH
+from .Elki import Elki
 
 
 class Hics(Elki):
@@ -39,6 +41,34 @@ class Hics(Elki):
         self.fit_shell_task = None
 
         return
+
+
+    # --------------
+    # Parameter - Properties
+    # --------------
+    @property
+    def k(self):
+        # One more setter-call to ensure the value is correct!
+        self.k = self._k
+        return self._k
+
+    @k.setter
+    def k(self, value):
+        self._k = self._compatible_k_n_instances(value)
+        return 
+
+    def _compatible_k_n_instances(self, k):
+        if self.n_instances is None:
+            return k
+        else:
+            res = min(k, self.n_instances-1)
+            if res < k:
+                msg = """
+                k was set to {}, but n_instances is {}.
+                ELKI won't have this. Changed k to {}
+                """.format(k, self.n_instances, res)
+                warnings.warn(msg)
+            return res
 
     # --------------
     # Internal Methods
